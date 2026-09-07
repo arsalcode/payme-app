@@ -22,8 +22,21 @@ import 'package:payme/ui/pages/transfer_amount_page.dart';
 import 'package:payme/ui/pages/transfer_page.dart';
 import 'package:payme/ui/pages/transfer_secces_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:payme/blocs/auth/auth_bloc.dart';
+import 'package:payme/blocs/transaction/transaction_bloc.dart';
+import 'package:payme/shared/shared_values.dart';
+import 'package:payme/ui/pages/admin/admin_dashboard_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: SharedValues.supabaseUrl,
+    anonKey: SharedValues.supabaseAnonKey,
+  );
+
   runApp(const MainApp());
 }
 
@@ -32,7 +45,17 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => AuthBloc()..add(AuthGetCurrentUser()),
+        ),
+        BlocProvider(
+          create: (context) =>
+              TransactionBloc()..add(TransactionGetLatestEvent()),
+        ),
+      ],
+      child: MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         // dialogBackgroundColor: lightkBackgroundColor,
@@ -75,6 +98,7 @@ class MainApp extends StatelessWidget {
         '/data-provider': (context) => const DataProviderPage(),
         '/data-package': (context) => const DataPackagePage(),
         '/data-succes': (context) => const DataSuccesPage(),
+        '/admin': (context) => const AdminDashboardPage(),
 
 
 
@@ -85,6 +109,7 @@ class MainApp extends StatelessWidget {
         
 
       },
+    ),
     );
   }
 }

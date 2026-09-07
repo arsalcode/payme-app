@@ -1,8 +1,8 @@
 import 'dart:async';
-
-import 'package:payme/shared/theme.dart';
-// import 'package:payme/ui/pages/oneboarding_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:payme/blocs/auth/auth_bloc.dart';
+import 'package:payme/shared/theme.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -13,34 +13,38 @@ class SplashPage extends StatefulWidget {
 
 class _SplashPageState extends State<SplashPage> {
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-
-    Timer(Duration(seconds: 1), () {
-      //  Navigator.pushNamed(context, '/oneboarding');
-      // Navigator.pushAndRemoveUntil(context, '/oneboarding', (r))
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        '/oneboarding', // Ganti dengan rute tujuan Anda
-        (route) => false,
-      );
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: darkBackgroundColor,
-      body: Center(
-        child: Container(
-          height: 50,
-          width: 155,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/images/img_logo_dark.png'),
-              // image: DecorationImage(image: AssetImage(Ass),),
-              fit: BoxFit.cover,
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthSuccess) {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/home-page',
+            (route) => false,
+          );
+        }
+
+        if (state is AuthFailed || state is AuthInitial) {
+          Timer(const Duration(seconds: 2), () {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/oneboarding',
+              (route) => false,
+            );
+          });
+        }
+      },
+      child: Scaffold(
+        backgroundColor: darkBackgroundColor,
+        body: Center(
+          child: Container(
+            height: 50,
+            width: 155,
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/img_logo_dark.png'),
+                fit: BoxFit.cover,
+              ),
             ),
           ),
         ),

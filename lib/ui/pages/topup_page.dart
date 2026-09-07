@@ -1,25 +1,39 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:payme/blocs/auth/auth_bloc.dart';
 import 'package:payme/shared/theme.dart';
+import 'package:payme/ui/pages/topup_ammount_page.dart';
 import 'package:payme/ui/widgets/bank_item.dart';
 import 'package:payme/ui/widgets/buttons.dart';
-import 'package:flutter/material.dart';
 
-class TopupPage extends StatelessWidget {
+class TopupPage extends StatefulWidget {
   const TopupPage({super.key});
 
   @override
+  State<TopupPage> createState() => _TopupPageState();
+}
+
+class _TopupPageState extends State<TopupPage> {
+  String selectedBank = 'BCA';
+
+  @override
   Widget build(BuildContext context) {
+    final authState = context.watch<AuthBloc>().state;
+    final user = authState is AuthSuccess ? authState.user : null;
+
+    final cardNumber = user?.cardNumber ?? '8008 2208 1996';
+    final userName = user?.name ?? 'User';
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Top Up',
-        ),
+        title: const Text('Top Up'),
       ),
       body: ListView(
-        padding: EdgeInsets.symmetric(
+        padding: const EdgeInsets.symmetric(
           horizontal: 24,
         ),
         children: [
-          SizedBox(
+          const SizedBox(
             height: 30,
           ),
           Text(
@@ -34,24 +48,29 @@ class TopupPage extends StatelessWidget {
           ),
           Row(
             children: [
-              Image.asset('assets/images/img_wallet.png'),
-              SizedBox(
+              Image.asset(
+                'assets/images/img_wallet.png',
+                width: 60,
+              ),
+              const SizedBox(
                 width: 16,
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '8008 2208 1996',
+                    cardNumber,
                     style: blackTextStyle.copyWith(
-                        fontSize: 16, fontWeight: medium),
+                      fontSize: 16,
+                      fontWeight: medium,
+                    ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 2,
                   ),
                   Text(
-                    'Muhammad Arsal',
-                    style: blackTextStyle.copyWith(
+                    userName,
+                    style: greyTextStyle.copyWith(
                       fontSize: 12,
                     ),
                   ),
@@ -59,7 +78,7 @@ class TopupPage extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 40,
           ),
           Text(
@@ -72,43 +91,81 @@ class TopupPage extends StatelessWidget {
           const SizedBox(
             height: 14,
           ),
-          const BankItem(
-            title: 'BANK BCA',
-            imageUrl: 'assets/images/img_bank_bca.png',
-            isSelected: true,
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedBank = 'BCA';
+              });
+            },
+            child: BankItem(
+              title: 'BANK BCA',
+              imageUrl: 'assets/images/img_bank_bca.png',
+              isSelected: selectedBank == 'BCA',
+            ),
           ),
           const SizedBox(
             height: 14,
           ),
-          const BankItem(
-            title: 'BANK BNI',
-            imageUrl: 'assets/images/img_bank_bni.png',
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedBank = 'BNI';
+              });
+            },
+            child: BankItem(
+              title: 'BANK BNI',
+              imageUrl: 'assets/images/img_bank_bni.png',
+              isSelected: selectedBank == 'BNI',
+            ),
           ),
           const SizedBox(
             height: 14,
           ),
-          const BankItem(
-            title: 'BANK MANDIRI',
-            imageUrl: 'assets/images/img_bank_mandiri.png',
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedBank = 'MANDIRI';
+              });
+            },
+            child: BankItem(
+              title: 'BANK MANDIRI',
+              imageUrl: 'assets/images/img_bank_mandiri.png',
+              isSelected: selectedBank == 'MANDIRI',
+            ),
           ),
           const SizedBox(
             height: 14,
           ),
-          const BankItem(
-            title: 'BANK OC BC',
-            imageUrl: 'assets/images/img_bank_ococ.png',
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedBank = 'OCBC';
+              });
+            },
+            child: BankItem(
+              title: 'BANK OCBC',
+              imageUrl: 'assets/images/img_bank_ococ.png',
+              isSelected: selectedBank == 'OCBC',
+            ),
           ),
           const SizedBox(
-            height: 12,
+            height: 30,
           ),
           CustomFilledButtons(
             title: 'Continue',
-            onPressed: (){
-              Navigator.pushNamed(context, '/topup-ammount');
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      TopupAmmountPage(bankName: selectedBank),
+                ),
+              );
             },
           ),
-
-          SizedBox(height: 57,),
+          const SizedBox(
+            height: 57,
+          ),
         ],
       ),
     );

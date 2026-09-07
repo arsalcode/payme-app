@@ -1,144 +1,177 @@
-import 'package:payme/shared/theme.dart';
-import 'package:payme/ui/widgets/buttons.dart';
-import 'package:payme/ui/widgets/forms.dart';
-import 'package:payme/ui/widgets/transfer_recent_user_item.dart';
-import 'package:payme/ui/widgets/transfer_result_user_item.dart';
 import 'package:flutter/material.dart';
-// import 'package:flutter/widgets.dart';
+import 'package:payme/models/user_model.dart';
+import 'package:payme/service/transaction_service.dart';
+import 'package:payme/shared/theme.dart';
+import 'package:payme/ui/pages/transfer_amount_page.dart';
+import 'package:payme/ui/widgets/buttons.dart';
+import 'package:payme/ui/widgets/transfer_result_user_item.dart';
 
-class TransferPage extends StatelessWidget {
+class TransferPage extends StatefulWidget {
   const TransferPage({super.key});
+
+  @override
+  State<TransferPage> createState() => _TransferPageState();
+}
+
+class _TransferPageState extends State<TransferPage> {
+  final TextEditingController searchController =
+      TextEditingController(text: '');
+  final TransactionService _transactionService = TransactionService();
+
+  List<UserModel> searchResults = [];
+  UserModel? selectedUser;
+  bool isLoading = false;
+
+  void onSearch(String query) async {
+    if (query.trim().isEmpty) {
+      setState(() {
+        searchResults = [];
+      });
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    final results = await _transactionService.searchUsers(query.trim());
+
+    setState(() {
+      searchResults = results;
+      isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Transfer',
-        ),
+        title: const Text('Transfer'),
       ),
       body: ListView(
-        padding: EdgeInsets.symmetric(
+        padding: const EdgeInsets.symmetric(
           vertical: 8.0,
           horizontal: 24,
         ),
         children: [
-          SizedBox(
+          const SizedBox(
             height: 30,
           ),
           Text(
-            'Seacrch',
+            'Search Recipient',
             style: blackTextStyle.copyWith(
               fontSize: 16,
               fontWeight: semiBold,
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 14,
           ),
-          CustomFormFailed(
-            title: 'by Username',
-            isShowTitle: false,
+          TextFormField(
+            controller: searchController,
+            onChanged: onSearch,
+            decoration: InputDecoration(
+              hintText: 'by Username (e.g. arsal)',
+              hintStyle: greyTextStyle,
+              prefixIcon: const Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              contentPadding: const EdgeInsets.all(12),
+            ),
           ),
-          // buildRecentUsers(),
-          buildResult(),
+          const SizedBox(
+            height: 30,
+          ),
+          Text(
+            'Search Results',
+            style: blackTextStyle.copyWith(
+              fontSize: 16,
+              fontWeight: semiBold,
+            ),
+          ),
+          const SizedBox(
+            height: 14,
+          ),
+          if (isLoading)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          else if (searchResults.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 20),
+              child: Center(
+                child: Text(
+                  searchController.text.isEmpty
+                      ? 'Ketik username untuk mencari teman'
+                      : 'Pengguna tidak ditemukan',
+                  style: greyTextStyle,
+                ),
+              ),
+            )
+          else
+            Wrap(
+              spacing: 17,
+              runSpacing: 17,
+              children: searchResults.map((user) {
+                final isSelected = selectedUser?.id == user.id;
 
-          SizedBox(
-            height: 274,
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      selectedUser = user;
+                    });
+                  },
+                  child: TransferResultUserItem(
+                    imageUrl: user.profilePicture != null &&
+                            user.profilePicture!.isNotEmpty
+                        ? user.profilePicture!
+                        : 'assets/images/img_frend1.png',
+                    name: user.name ?? 'User',
+                    username: user.username ?? 'user',
+                    isVerified: user.isVerified ?? false,
+                    isSelected: isSelected,
+                  ),
+                );
+              }).toList(),
+            ),
+          const SizedBox(
+            height: 60,
           ),
           CustomFilledButtons(
             title: 'Continue',
             onPressed: () {
-              Navigator.pushNamed(context, '/transfer-amount' );
+              final targetUsername = selectedUser?.username ??
+                  searchController.text.replaceAll('@', '').trim();
+
+              if (targetUsername.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    backgroundColor: Colors.red,
+                    content: Text('Silakan pilih atau ketik username penerima'),
+                  ),
+                );
+                return;
+              }
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TransferAmmountPage(
+                    recipientUsername: targetUsername,
+                  ),
+                ),
+              );
             },
           ),
-
-          SizedBox(height: 50,),
+          const SizedBox(
+            height: 50,
+          ),
         ],
       ),
     );
   }
-}
-
-Widget buildRecentUsers() {
-  return Container(
-    margin: const EdgeInsets.only(
-      top: 40,
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Recent Users',
-          style: blackTextStyle.copyWith(
-            fontSize: 16,
-            fontWeight: semiBold,
-          ),
-        ),
-        SizedBox(
-          height: 14,
-        ),
-        const TransferRecentUserItem(
-          imageUrl: 'assets/images/img_frend1.png',
-          name: 'Yonna Jie',
-          Username: 'yoenna',
-          isVerified: true,
-        ),
-        const TransferRecentUserItem(
-          imageUrl: 'assets/images/img_frend2.png',
-          name: 'Jonnn ni',
-          Username: 'jonnhi',
-          isVerified: false,
-        ),
-        const TransferRecentUserItem(
-          imageUrl: 'assets/images/img_frend3.png',
-          name: 'Eke Emba',
-          Username: 'ekake',
-          isVerified: false,
-        ),
-      ],
-    ),
-  );
-}
-
-Widget buildResult() {
-  return Container(
-    margin: EdgeInsets.only(
-      top: 40,
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Result',
-          style: blackTextStyle.copyWith(
-            fontSize: 16,
-            fontWeight: semiBold,
-          ),
-        ),
-        const SizedBox(
-          height: 14,
-        ),
-        Wrap(
-          spacing: 17,
-          runSpacing: 17,
-          children: [
-            const TransferResultUserItem(
-              imageUrl: 'assets/images/img_frend1.png',
-              name: 'Yonna Jie',
-              Username: 'yoenna',
-              isVerified: true,
-            ),
-            const TransferResultUserItem(
-              imageUrl: 'assets/images/img_frend1.png',
-              name: 'Yonna Jie',
-              Username: 'yoenna',
-              isVerified: true,
-              isSelected: true,
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
 }

@@ -1,9 +1,15 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+import 'package:payme/blocs/auth/auth_bloc.dart';
+import 'package:payme/blocs/transaction/transaction_bloc.dart';
+import 'package:payme/models/transaction_model.dart';
+import 'package:payme/models/user_model.dart';
 import 'package:payme/shared/theme.dart';
 import 'package:payme/ui/widgets/home_lates_trasaction_item.dart';
 import 'package:payme/ui/widgets/home_services_item.dart';
 import 'package:payme/ui/widgets/home_tips_item.dart';
 import 'package:payme/ui/widgets/home_user_item.dart';
-import 'package:flutter/material.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -76,24 +82,30 @@ class HomePage extends StatelessWidget {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      body: ListView(
-        padding: EdgeInsets.symmetric(
-          horizontal: 24,
-        ),
-        children: [
-          buildProfile(context),
-          buildWalentCart(),
-          buildLevel(),
-          buildServices(context),
-          buildLatesTransction(),
-          buildSendAgain(),
-          buildFrienLyTips(),
-        ],
+      body: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, state) {
+          final user = state is AuthSuccess ? state.user : null;
+
+          return ListView(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24,
+            ),
+            children: [
+              buildProfile(context, user),
+              buildWalentCart(user),
+              buildLevel(),
+              buildServices(context),
+              buildLatesTransction(),
+              buildSendAgain(),
+              buildFrienLyTips(),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget buildProfile(BuildContext context) {
+  Widget buildProfile(BuildContext context, UserModel? user) {
     return Container(
       margin: const EdgeInsets.only(
         top: 48,
@@ -114,7 +126,7 @@ class HomePage extends StatelessWidget {
                 height: 2,
               ),
               Text(
-                'Muhammad',
+                user?.name ?? 'User',
                 style: blackTextStyle.copyWith(
                   fontSize: 20,
                   fontWeight: semiBold,
@@ -123,36 +135,45 @@ class HomePage extends StatelessWidget {
             ],
           ),
           GestureDetector(
-            onTap: () => {
-              Navigator.pushNamed(context, '/profile'),
+            onTap: () {
+              Navigator.pushNamed(context, '/profile');
             },
             child: Container(
               width: 60,
               height: 60,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                image: DecorationImage(
-                  image: AssetImage('assets/images/img_profile.png'),
-                ),
+                image: user?.profilePicture != null &&
+                        user!.profilePicture!.isNotEmpty
+                    ? DecorationImage(
+                        fit: BoxFit.cover,
+                        image: NetworkImage(user.profilePicture!),
+                      )
+                    : const DecorationImage(
+                        fit: BoxFit.cover,
+                        image: AssetImage('assets/images/img_profile.png'),
+                      ),
               ),
-              child: Align(
-                alignment: Alignment.topRight,
-                child: Container(
-                  width: 16,
-                  height: 16,
-                  decoration: BoxDecoration(
-                    color: whiteColor,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.check_circle,
-                      color: greenColor,
-                      size: 20,
-                    ),
-                  ),
-                ),
-              ),
+              child: user?.isVerified == true
+                  ? Align(
+                      alignment: Alignment.topRight,
+                      child: Container(
+                        width: 16,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: whiteColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.check_circle,
+                            color: greenColor,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    )
+                  : null,
             ),
           ),
         ],
@@ -160,14 +181,25 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget buildWalentCart() {
+  Widget buildWalentCart(UserModel? user) {
+    final cardNumber = user?.cardNumber ?? '1280';
+    final maskedCard = cardNumber.length >= 4
+        ? '**** **** **** ${cardNumber.substring(cardNumber.length - 4)}'
+        : '**** **** **** 1280';
+
+    final balanceFormatted = NumberFormat.currency(
+      locale: 'id',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    ).format(user?.balance ?? 100000);
+
     return Container(
       width: double.infinity,
       height: 220,
       margin: const EdgeInsets.only(
         top: 38,
       ),
-      padding: EdgeInsets.all(30),
+      padding: const EdgeInsets.all(30),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28),
         image: const DecorationImage(
@@ -179,24 +211,24 @@ class HomePage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Muhammad ',
+            user?.name ?? 'User',
             style: whiteTextStyle.copyWith(
               fontSize: 18,
               fontWeight: medium,
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 28,
           ),
           Text(
-            '**** **** **** 1280,',
+            maskedCard,
             style: whiteTextStyle.copyWith(
               fontSize: 18,
               fontWeight: medium,
               letterSpacing: 5,
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 21,
           ),
           Text(
@@ -204,7 +236,7 @@ class HomePage extends StatelessWidget {
             style: whiteTextStyle,
           ),
           Text(
-            'Rp 12.500',
+            balanceFormatted,
             style: whiteTextStyle.copyWith(
               fontSize: 24,
               fontWeight: semiBold,
@@ -302,7 +334,7 @@ class HomePage extends StatelessWidget {
               ),
               HomeServicesItem(
                 iconUrl: 'assets/images/ic_withrow.png',
-                title: 'WithRow',
+                title: 'Withdraw',
                 onTap: () {},
               ),
               HomeServicesItem(
@@ -322,60 +354,104 @@ class HomePage extends StatelessWidget {
 
   Widget buildLatesTransction() {
     return Container(
-      margin: EdgeInsets.only(top: 30),
+      margin: const EdgeInsets.only(top: 30),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Lates Tranction',
+            'Latest Transactions',
             style: blackTextStyle.copyWith(
               fontSize: 16,
               fontWeight: semiBold,
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 14,
           ),
           Container(
-            padding: EdgeInsets.all(22),
-            margin: EdgeInsets.only(top: 14),
+            padding: const EdgeInsets.all(22),
+            margin: const EdgeInsets.only(top: 14),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               color: whiteColor,
             ),
-            child: Column(
-              children: const [
-                HomeLatesTrasactionItem(
-                  iconUrl: 'assets/images/ic_transaction.png',
-                  title: 'Top Up',
-                  time: 'Yesterday',
-                  value: '+ 450.000',
-                ),
-                HomeLatesTrasactionItem(
-                  iconUrl: 'assets/images/ic_casback.png',
-                  title: 'Cashback',
-                  time: 'Sep 11',
-                  value: '+ 22.000',
-                ),
-                HomeLatesTrasactionItem(
-                  iconUrl: 'assets/images/ic_trasaction_without.png',
-                  title: 'Withdraw',
-                  time: 'Sep 2',
-                  value: '- 5.000',
-                ),
-                HomeLatesTrasactionItem(
-                  iconUrl: 'assets/images/ic_transfer.png',
-                  title: 'Transfer',
-                  time: 'Aug 27',
-                  value: '- 123.500',
-                ),
-                HomeLatesTrasactionItem(
-                  iconUrl: 'assets/images/ic_keranjang.png',
-                  title: 'Electric',
-                  time: 'Feb 18',
-                  value: '- 12.300.000',
-                ),
-              ],
+            child: BlocBuilder<TransactionBloc, TransactionState>(
+              builder: (context, state) {
+                if (state is TransactionLoading) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+
+                if (state is TransactionLatestLoaded) {
+                  if (state.transactions.isEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: Text(
+                          'Belum ada transaksi',
+                          style: greyTextStyle,
+                        ),
+                      ),
+                    );
+                  }
+
+                  return Column(
+                    children: state.transactions.map((tx) {
+                      String icon = 'assets/images/ic_transaction.png';
+                      final isIncome = tx.transactionType == 'topup' ||
+                          tx.transactionType == 'transfer_in';
+
+                      if (tx.transactionType == 'topup') {
+                        icon = 'assets/images/ic_transaction.png';
+                      } else if (tx.transactionType == 'transfer_in') {
+                        icon = 'assets/images/ic_casback.png';
+                      } else if (tx.transactionType == 'transfer_out') {
+                        icon = 'assets/images/ic_transfer.png';
+                      } else {
+                        icon = 'assets/images/ic_product_data.png';
+                      }
+
+                      final timeString = tx.createdAt != null
+                          ? DateFormat('MMM dd, HH:mm')
+                              .format(tx.createdAt!.toLocal())
+                          : 'Baru saja';
+
+                      final amountFormatted = NumberFormat.currency(
+                        locale: 'id',
+                        symbol: '',
+                        decimalDigits: 0,
+                      ).format(tx.amount ?? 0);
+
+                      final valueString = isIncome
+                          ? '+ $amountFormatted'
+                          : '- $amountFormatted';
+
+                      return HomeLatesTrasactionItem(
+                        iconUrl: icon,
+                        title: tx.title ?? 'Transaksi',
+                        time: timeString,
+                        value: valueString,
+                      );
+                    }).toList(),
+                  );
+                }
+
+                // Fallback awal jika belum terambil
+                return const Column(
+                  children: [
+                    HomeLatesTrasactionItem(
+                      iconUrl: 'assets/images/ic_transaction.png',
+                      title: 'Welcome Bonus',
+                      time: 'Hari ini',
+                      value: '+ 100.000',
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ],
@@ -439,7 +515,7 @@ class HomePage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Frenly Ly Tips',
+            'Friendly Tips',
             style: blackTextStyle.copyWith(
               fontWeight: semiBold,
               fontSize: 17,

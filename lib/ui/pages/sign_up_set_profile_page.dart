@@ -29,7 +29,7 @@ class _SignUpSetProfilePageState extends State<SignUpSetProfilePage> {
   XFile? selectedImage;
 
   bool validate() {
-    if (pinController.text != 6) {
+    if (pinController.text.length != 6) {
       return false;
     }
     return true;
@@ -37,9 +37,6 @@ class _SignUpSetProfilePageState extends State<SignUpSetProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    print(
-      widget.data.toJson(),
-    );
     return Scaffold(
       body: ListView(
         padding: const EdgeInsets.symmetric(
@@ -71,10 +68,14 @@ class _SignUpSetProfilePageState extends State<SignUpSetProfilePage> {
           SizedBox(height: 20),
           GestureDetector(
             onTap: () async {
-              final Image = await selectedImage;
-              setState(() {
-                selectedImage = Image;
-              });
+              final image = await ImagePicker().pickImage(
+                source: ImageSource.gallery,
+              );
+              if (image != null) {
+                setState(() {
+                  selectedImage = image;
+                });
+              }
             },
             child: Container(
               padding: EdgeInsets.all(20),
@@ -103,21 +104,18 @@ class _SignUpSetProfilePageState extends State<SignUpSetProfilePage> {
                     child: selectedImage == null
                         ? Center(
                             child: Image.asset(
-                              'assets/ic_upload.png',
+                              'assets/images/ic_upload.png',
                               width: 32,
                             ),
                           )
-                        : Image.file(
-                            File(selectedImage!.path),
-                            fit: BoxFit.cover,
-                          ),
+                        : null,
                   ),
                   SizedBox(
                     height: 16,
                   ),
 
                   Text(
-                    'Shayna Hanna',
+                    widget.data.name ?? '',
                     style: blackTextStyle.copyWith(
                         fontSize: 16, fontWeight: medium),
                   ),

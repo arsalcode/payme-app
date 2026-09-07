@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:payme/blocs/auth/auth_bloc.dart';
 import 'package:payme/shared/theme.dart';
 import 'package:payme/ui/widgets/buttons.dart';
-import 'package:flutter/material.dart';
 
 class PinPage extends StatefulWidget {
   const PinPage({super.key});
@@ -12,27 +14,46 @@ class PinPage extends StatefulWidget {
 class _PinPageState extends State<PinPage> {
   final TextEditingController pinController = TextEditingController(text: '');
 
-  addPin(String number) async {
-    if (await pinController.text.length < 6) {
-      setState(
-        () {
-          pinController.text = pinController.text + number;
-        },
-      );
+  void addPin(String number) {
+    if (pinController.text.length < 6) {
+      setState(() {
+        pinController.text = pinController.text + number;
+      });
     }
-    if (pinController.text == '123123') {
-      Navigator.pop(context, true);
+
+    if (pinController.text.length == 6) {
+      final authState = context.read<AuthBloc>().state;
+      final currentPin =
+          authState is AuthSuccess ? authState.user.pin : null;
+
+      // Cocokkan dengan PIN pengguna, atau PIN default '123123'
+      if ((currentPin != null && pinController.text == currentPin) ||
+          pinController.text == '123123') {
+        Navigator.pop(context, true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.red,
+            content: Text(
+              'PIN yang Anda masukkan salah!',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        );
+        setState(() {
+          pinController.text = '';
+        });
+      }
     }
   }
 
-  deletePin() async {
-    if ( await pinController.text.isNotEmpty) {
+  void deletePin() {
+    if (pinController.text.isNotEmpty) {
       setState(() {
         pinController.text =
             pinController.text.substring(0, pinController.text.length - 1);
       });
     }
-  
   }
 
   @override
