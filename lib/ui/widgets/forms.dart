@@ -1,0 +1,51 @@
+import 'package:payme/shared/theme.dart';
+import 'package:flutter/material.dart';
+
+class CustomFormFailed extends StatelessWidget {
+  final String title;
+  final bool obscureText;
+  final TextEditingController? controller;
+  final isShowTitle;
+  final TextInputType? keyboardType;
+
+  const CustomFormFailed({
+    super.key,
+    required this.title,
+    this.obscureText = false,
+    this.controller,
+    this.isShowTitle = true,
+    this.keyboardType,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if(isShowTitle)Text(
+          title,
+          style: blackTextStyle.copyWith(
+            fontWeight: medium,
+          ),
+        ),
+        if(isShowTitle) SizedBox(
+          height: 8,
+        ),
+        TextFormField(
+          obscureText: obscureText,
+          controller: controller,
+          keyboardType: keyboardType,
+          
+          decoration: InputDecoration(
+            hintText: !isShowTitle? title : null,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              contentPadding: const EdgeInsets.all(12)),
+        )
+      ],
+    );
+  }
+
+ 
+}

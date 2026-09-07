@@ -1,0 +1,12 @@
+{
+    "cmake.sourceDirectory": "E:/ARSAL/code/flutter/bisa_cob_ey/linux",
+    "editor.tabSize": 4,
+    "editor.fontSize": 10,
+    "editor.renderWhitespace": "all",
+    "editor.cursorStyle": "line-thin",
+    "files.autoSave": "afterDelay",
+    "editor.codeLensFontSize": 5,
+    "editor.cursorWidth": 2,
+    "cmake.ignoreCMakeListsMissing": true,
+    "java.configuration.updateBuildConfiguration": "interactive"
+}

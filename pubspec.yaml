@@ -1,0 +1,101 @@
+name: payme
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ">=3.5.3 <4.0.0"
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+  carousel_slider: ^5.0.0
+  google_fonts: ^6.3.3
+  url_launcher: ^6.3.1
+  intl: ^0.20.2
+  http: ^1.3.0
+  flutter_bloc: ^9.1.0
+  equatable: ^2.0.7
+  image_picker: ^1.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  # flutter_lints: ^4.0.0
+  flutter_gen_runner: ^5.8.0
+  build_runner: ^2.4.13
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/
+    - assets/images/img_logo_dark.png
+    - assets/images/img_onbording1.png
+    - assets/images/img_onbording2.png
+    - assets/images/img_onbording3.png
+    - assets/images/img_logo_light.png
+    - assets/images/ic_upload.png
+    - assets/images/img_profile.png
+    - assets/images/ic_history.png
+    - assets/images/ic_overiview.png
+    - assets/images/ic_statistic.png
+    - assets/images/ic_reward.png
+    - assets/images/ic_plus_cirle.png
+    - assets/images/img_bg_card.png
+    - assets/images/ic_top.png
+    - assets/images/ic_send.png
+    - assets/images/ic_withrow.png
+    - assets/images/ic_more.png
+
+    - assets/images/ic_transaction.png
+    - assets/images/ic_casback.png
+    - assets/images/ic_trasaction_without.png
+    - assets/images/ic_transfer.png
+    - assets/images/ic_keranjang.png
+
+    - assets/images/img_frend1.png
+    - assets/images/img_frend2.png
+    - assets/images/img_frend3.png
+    - assets/images/logo_unpak.png
+
+    - assets/images/img_tips1.png
+    - assets/images/img_tips2.png
+    - assets/images/img_tips3.png
+    - assets/images/img_tips4.png
+
+    - assets/images/ic_edit_profile.png
+
+    - assets/images/img_wallet.png
+    - assets/images/img_bank_bca.png
+    - assets/images/img_bank_bni.png
+    - assets/images/img_bank_mandiri.png
+    - assets/images/img_bank_ococ.png
+
+    - assets/images/ic_product_data.png
+    - assets/images/ic_product_food.png
+    - assets/images/ic_product_movie.png
+    - assets/images/ic_product_stream.png
+    - assets/images/ic_product_travel.png
+    - assets/images/ic_product_water.png
+
+    - assets/images/img_walet.png
+
+    - assets/images/img_provider_telkomsel.png
+    - assets/images/img_provider_indosat.png
+    - assets/images/img_provider_singtel.png
+
+
+
+
+
+
+
+  
+
+
+flutter_gen:
+  output: lib/gen/
+  integrations:
+    flutter_svg: true
