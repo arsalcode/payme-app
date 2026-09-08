@@ -50,6 +50,33 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       }
     });
 
+    on<TransactionWithdrawEvent>((event, emit) async {
+      try {
+        emit(TransactionLoading());
+        final token = await _transactionService.withdraw(
+          amount: event.amount,
+          method: event.method,
+        );
+        emit(TransactionSuccess(token));
+      } catch (e) {
+        emit(TransactionFailed(e.toString()));
+      }
+    });
+
+    on<TransactionPayServiceEvent>((event, emit) async {
+      try {
+        emit(TransactionLoading());
+        await _transactionService.payDigitalService(
+          amount: event.amount,
+          serviceTitle: event.serviceTitle,
+          serviceType: event.serviceType,
+        );
+        emit(TransactionSuccess('Pembayaran ${event.serviceTitle} berhasil!'));
+      } catch (e) {
+        emit(TransactionFailed(e.toString()));
+      }
+    });
+
     on<TransactionGetLatestEvent>((event, emit) async {
       try {
         emit(TransactionLoading());

@@ -48,4 +48,32 @@ class TransactionBuyDataEvent extends TransactionEvent {
   List<Object?> get props => [amount, providerName, packageName];
 }
 
+class TransactionWithdrawEvent extends TransactionEvent {
+  final int amount;
+  final String method;
+
+  const TransactionWithdrawEvent({
+    required this.amount,
+    required this.method,
+  });
+
+  @override
+  List<Object?> get props => [amount, method];
+}
+
+class TransactionPayServiceEvent extends TransactionEvent {
+  final int amount;
+  final String serviceTitle;
+  final String serviceType;
+
+  const TransactionPayServiceEvent({
+    required this.amount,
+    required this.serviceTitle,
+    required this.serviceType,
+  });
+
+  @override
+  List<Object?> get props => [amount, serviceTitle, serviceType];
+}
+
 class TransactionGetLatestEvent extends TransactionEvent {}

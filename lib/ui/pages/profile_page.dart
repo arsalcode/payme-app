@@ -36,42 +36,56 @@ class ProfilePage extends StatelessWidget {
             ),
             child: Column(
               children: [
-                Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: user?.profilePicture != null &&
-                            user!.profilePicture!.isNotEmpty
-                        ? DecorationImage(
-                            fit: BoxFit.cover,
-                            image: NetworkImage(user.profilePicture!),
-                          )
-                        : const DecorationImage(
-                            fit: BoxFit.cover,
-                            image: AssetImage('assets/images/img_profile.png'),
-                          ),
-                  ),
-                  child: user?.isVerified == true
-                      ? Align(
-                          alignment: Alignment.topRight,
-                          child: Container(
-                            width: 28,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              color: whiteColor,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: Icon(
-                                Icons.check_circle,
-                                color: greenColor,
-                                size: 20,
+                Stack(
+                  alignment: Alignment.topRight,
+                  children: [
+                    Container(
+                      width: 120,
+                      height: 120,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFFF1F3F6),
+                      ),
+                      child: ClipOval(
+                        child: user?.profilePicture != null &&
+                                user!.profilePicture!.isNotEmpty &&
+                                user.profilePicture!.startsWith('http')
+                            ? Image.network(
+                                user.profilePicture!,
+                                width: 120,
+                                height: 120,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Image.asset(
+                                  'assets/images/img_profile.png',
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : Image.asset(
+                                'assets/images/img_profile.png',
+                                width: 120,
+                                height: 120,
+                                fit: BoxFit.cover,
                               ),
-                            ),
+                      ),
+                    ),
+                    if (user?.isVerified == true)
+                      Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: whiteColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.check_circle,
+                            color: greenColor,
+                            size: 24,
                           ),
-                        )
-                      : null,
+                        ),
+                      ),
+                  ],
                 ),
                 const SizedBox(
                   height: 16,
@@ -100,38 +114,39 @@ class ProfilePage extends StatelessWidget {
                   title: 'Edit Profile',
                   onTap: () async {
                     if (await Navigator.pushNamed(context, '/pin') == true) {
-                      Navigator.pushNamed(context, '/profile-edit');
+                      if (context.mounted) {
+                        Navigator.pushNamed(context, '/profile-edit');
+                      }
                     }
                   },
                 ),
                 ProfileMenuItem(
-                  iconUrl: 'assets/images/ic_edit_profile.png',
+                  iconUrl: 'assets/images/ic_pin.png',
                   title: 'My PIN',
                   onTap: () async {
                     if (await Navigator.pushNamed(context, '/pin') == true) {
-                      Navigator.pushNamed(context, '/profile-edit-pin');
+                      if (context.mounted) {
+                        Navigator.pushNamed(context, '/profile-edit-pin');
+                      }
                     }
                   },
                 ),
                 ProfileMenuItem(
-                  iconUrl: 'assets/images/ic_edit_profile.png',
+                  iconUrl: 'assets/images/ic_wallet_setting.png',
                   title: 'Wallet Settings',
-                  onTap: () {},
-                ),
-                ProfileMenuItem(
-                  iconUrl: 'assets/images/ic_edit_profile.png',
-                  title: 'My Rewards',
-                  onTap: () {},
-                ),
-                ProfileMenuItem(
-                  iconUrl: 'assets/images/ic_edit_profile.png',
-                  title: 'Admin Back-Office',
                   onTap: () {
-                    Navigator.pushNamed(context, '/admin');
+                    Navigator.pushNamed(context, '/wallet-settings');
                   },
                 ),
                 ProfileMenuItem(
-                  iconUrl: 'assets/images/ic_edit_profile.png',
+                  iconUrl: 'assets/images/ic_my_reward.png',
+                  title: 'My Rewards',
+                  onTap: () {
+                    Navigator.pushNamed(context, '/reward');
+                  },
+                ),
+                ProfileMenuItem(
+                  iconUrl: 'assets/images/ic_logout_user.png',
                   title: 'Log Out',
                   onTap: () {
                     context.read<AuthBloc>().add(AuthLogout());
@@ -146,11 +161,19 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
           const SizedBox(
-            height: 40,
+            height: 30,
           ),
           CustomTextButton(
             title: 'Report a Problem',
-            onPressed: () {},
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  backgroundColor: blueColor,
+                  content: const Text(
+                      'Pusat Bantuan Payme: Hubungi support@payme.id jika mengalami kendala.'),
+                ),
+              );
+            },
           ),
           const SizedBox(
             height: 50,

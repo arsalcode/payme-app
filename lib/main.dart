@@ -21,13 +21,17 @@ import 'package:payme/ui/pages/topup_succes_page.dart';
 import 'package:payme/ui/pages/transfer_amount_page.dart';
 import 'package:payme/ui/pages/transfer_page.dart';
 import 'package:payme/ui/pages/transfer_secces_page.dart';
+import 'package:payme/ui/pages/history_page.dart';
+import 'package:payme/ui/pages/statistic_page.dart';
+import 'package:payme/ui/pages/reward_page.dart';
+import 'package:payme/ui/pages/withdraw_page.dart';
+import 'package:payme/ui/pages/wallet_settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:payme/blocs/auth/auth_bloc.dart';
 import 'package:payme/blocs/transaction/transaction_bloc.dart';
 import 'package:payme/shared/shared_values.dart';
-import 'package:payme/ui/pages/admin/admin_dashboard_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -98,7 +102,11 @@ class MainApp extends StatelessWidget {
         '/data-provider': (context) => const DataProviderPage(),
         '/data-package': (context) => const DataPackagePage(),
         '/data-succes': (context) => const DataSuccesPage(),
-        '/admin': (context) => const AdminDashboardPage(),
+        '/history': (context) => const HistoryPage(),
+        '/statistic': (context) => const StatisticPage(),
+        '/reward': (context) => const RewardPage(),
+        '/withdraw': (context) => const WithdrawPage(),
+        '/wallet-settings': (context) => const WalletSettingsPage(),
 
 
 

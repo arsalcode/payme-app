@@ -34,7 +34,7 @@ class UserModel {
       profilePicture: json['profile_picture'],
       ktpPicture: json['ktp_picture'],
       isVerified: json['is_verified'] ?? false,
-      cardNumber: walletJson?['card_number'] ?? json['card_number'],
+      cardNumber: (walletJson?['card_number'] ?? json['card_number'])?.toString(),
       balance: walletJson?['balance'] is int
           ? walletJson!['balance']
           : (walletJson?['balance'] as num?)?.toInt() ?? 0,

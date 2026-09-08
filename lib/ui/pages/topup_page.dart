@@ -21,7 +21,10 @@ class _TopupPageState extends State<TopupPage> {
     final authState = context.watch<AuthBloc>().state;
     final user = authState is AuthSuccess ? authState.user : null;
 
-    final cardNumber = user?.cardNumber ?? '8008 2208 1996';
+    final rawCard = user?.cardNumber ?? '5399882208191280';
+    final cardNumber = rawCard.length >= 16
+        ? '${rawCard.substring(0, 4)} ${rawCard.substring(4, 8)} ${rawCard.substring(8, 12)} ${rawCard.substring(12, 16)}'
+        : rawCard;
     final userName = user?.name ?? 'User';
 
     return Scaffold(

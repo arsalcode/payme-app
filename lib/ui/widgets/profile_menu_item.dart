@@ -1,42 +1,63 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:payme/shared/theme.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 class ProfileMenuItem extends StatelessWidget {
-  final String iconUrl;
+  final String? iconUrl;
+  final IconData? iconData;
   final String title;
   final VoidCallback? onTap;
 
   const ProfileMenuItem({
-    Key? key,
-    required this.iconUrl,
+    super.key,
+    this.iconUrl,
+    this.iconData,
     required this.title,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      // onTap: () {
-      //   Navigator.pushNamed(context, '/pin');
-      // },
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.only(bottom: 30),
+        margin: const EdgeInsets.only(bottom: 26),
         child: Row(
           children: [
-            Image.asset(
-              iconUrl,
-              width: 24,
-            ),
+            if (iconUrl != null)
+              Image.asset(
+                iconUrl!,
+                width: 24,
+                height: 24,
+                errorBuilder: (context, error, stackTrace) => Icon(
+                  Icons.circle,
+                  size: 20,
+                  color: blueColor,
+                ),
+              )
+            else if (iconData != null)
+              Icon(
+                iconData,
+                size: 24,
+                color: blackColor,
+              ),
             const SizedBox(
               width: 18,
             ),
-            Text(
-              title,
-              style: blackTextStyle.copyWith(
-                fontWeight: medium,
+            Expanded(
+              child: Text(
+                title,
+                style: blackTextStyle.copyWith(
+                  fontWeight: medium,
+                  fontSize: 14,
+                ),
               ),
+            ),
+            const Icon(
+              Icons.chevron_right,
+              size: 20,
+              color: Color(0xffA4A8AE),
             ),
           ],
         ),

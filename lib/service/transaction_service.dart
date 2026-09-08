@@ -166,7 +166,86 @@ class TransactionService {
     }
   }
 
-  // 4. Ambil Riwayat Transaksi Terkini
+  // 4. Tarik Tunai (Withdraw)
+  Future<String> withdraw({
+    required int amount,
+    required String method,
+  }) async {
+    try {
+      final userId = _currentUserId;
+
+      final wallet = await _supabase
+          .from('wallets')
+          .select()
+          .eq('user_id', userId)
+          .single();
+
+      final currentBalance = (wallet['balance'] as num).toInt();
+      if (currentBalance < amount) {
+        throw Exception('Saldo dompet tidak mencukupi untuk penarikan ini.');
+      }
+
+      // Potong saldo dompet
+      await _supabase
+          .from('wallets')
+          .update({'balance': currentBalance - amount}).eq('user_id', userId);
+
+      // Catat mutasi penarikan di tabel transactions
+      await _supabase.from('transactions').insert({
+        'user_id': userId,
+        'transaction_type': 'withdraw',
+        'title': 'Tarik Tunai $method',
+        'amount': amount,
+        'status': 'success',
+      });
+
+      // Generate kode OTP penarikan 6 digit
+      final random = DateTime.now().millisecondsSinceEpoch % 900000 + 100000;
+      return random.toString();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // 5. Pembayaran Layanan Digital / Tagihan (PDAM, Stream, Movie, dll)
+  Future<void> payDigitalService({
+    required int amount,
+    required String serviceTitle,
+    required String serviceType,
+  }) async {
+    try {
+      final userId = _currentUserId;
+
+      final wallet = await _supabase
+          .from('wallets')
+          .select()
+          .eq('user_id', userId)
+          .single();
+
+      final currentBalance = (wallet['balance'] as num).toInt();
+      if (currentBalance < amount) {
+        throw Exception('Saldo dompet tidak mencukupi untuk pembayaran ini.');
+      }
+
+      // Potong saldo
+      await _supabase
+          .from('wallets')
+          .update({'balance': currentBalance - amount}).eq('user_id', userId);
+
+      // Catat transaksi di Supabase
+      await _supabase.from('transactions').insert({
+        'user_id': userId,
+        'transaction_type': 'payment',
+        'title': serviceTitle,
+        'amount': amount,
+        'status': 'success',
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // 6. Ambil Riwayat Transaksi Terkini
   Future<List<TransactionModel>> getLatestTransactions() async {
     try {
       final userId = _currentUserId;

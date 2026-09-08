@@ -129,11 +129,24 @@ class AuthService {
 
       final userRes =
           await _supabase.from('users').select().eq('id', user.id).single();
-      final walletRes = await _supabase
+      var walletRes = await _supabase
           .from('wallets')
           .select()
           .eq('user_id', user.id)
           .maybeSingle();
+
+      if (walletRes == null || walletRes['card_number'] == null) {
+        final random12 =
+            DateTime.now().millisecondsSinceEpoch.toString().substring(1, 13);
+        final cardNumber = '5399$random12';
+        final newWallet = {
+          'user_id': user.id,
+          'card_number': cardNumber,
+          'balance': 100000,
+        };
+        await _supabase.from('wallets').upsert(newWallet);
+        walletRes = newWallet;
+      }
 
       return UserModel.fromJson(userRes, walletJson: walletRes);
     } catch (e) {
@@ -149,11 +162,24 @@ class AuthService {
 
       final userRes =
           await _supabase.from('users').select().eq('id', user.id).single();
-      final walletRes = await _supabase
+      var walletRes = await _supabase
           .from('wallets')
           .select()
           .eq('user_id', user.id)
           .maybeSingle();
+
+      if (walletRes == null || walletRes['card_number'] == null) {
+        final random12 =
+            DateTime.now().millisecondsSinceEpoch.toString().substring(1, 13);
+        final cardNumber = '5399$random12';
+        final newWallet = {
+          'user_id': user.id,
+          'card_number': cardNumber,
+          'balance': 100000,
+        };
+        await _supabase.from('wallets').upsert(newWallet);
+        walletRes = newWallet;
+      }
 
       return UserModel.fromJson(userRes, walletJson: walletRes);
     } catch (e) {
@@ -165,6 +191,85 @@ class AuthService {
   Future<void> signOut() async {
     try {
       await _supabase.auth.signOut();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Update Profil Pengguna
+  Future<void> updateUser({
+    required String name,
+    required String username,
+    required String email,
+    String? password,
+  }) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('Pengguna belum login.');
+
+      final cleanUsername = username.replaceAll('@', '').trim().toLowerCase();
+
+      // Cek apakah username sudah digunakan user lain
+      final checkUser = await _supabase
+          .from('users')
+          .select('id')
+          .eq('username', cleanUsername)
+          .neq('id', user.id)
+          .maybeSingle();
+
+      if (checkUser != null) {
+        throw Exception(
+            'Username @$cleanUsername sudah digunakan pengguna lain.');
+      }
+
+      // Update data di tabel public.users
+      final updateData = {
+        'name': name.trim(),
+        'username': cleanUsername,
+        'email': email.trim().toLowerCase(),
+      };
+
+      await _supabase.from('users').update(updateData).eq('id', user.id);
+
+      // Jika ganti password
+      if (password != null && password.trim().isNotEmpty) {
+        await _supabase.auth
+            .updateUser(UserAttributes(password: password.trim()));
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Update PIN Keamanan
+  Future<void> updatePin({
+    required String oldPin,
+    required String newPin,
+  }) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('Pengguna belum login.');
+
+      // Validasi PIN lama
+      final currentProfile = await _supabase
+          .from('users')
+          .select('pin')
+          .eq('id', user.id)
+          .single();
+
+      final actualPin = currentProfile['pin']?.toString();
+      if (actualPin != oldPin.trim()) {
+        throw Exception('PIN lama yang Anda masukkan tidak sesuai.');
+      }
+
+      if (newPin.trim().length != 6) {
+        throw Exception('PIN baru harus berupa 6 digit angka.');
+      }
+
+      // Simpan PIN baru
+      await _supabase
+          .from('users')
+          .update({'pin': newPin.trim()}).eq('id', user.id);
     } catch (e) {
       rethrow;
     }
